@@ -1,0 +1,67 @@
+Tokens of Line Number 1:
+--------------------------
+
+Tokens of Line Number 2:
+--------------------------
+
+Tokens of Line Number 3:
+--------------------------
+
+Tokens of Line Number 4:
+int is a keyword
+main(){ is an Invalid Identifier
+--------------------------
+
+Tokens of Line Number 5:
+int is a keyword
+a=10, is an Invalid Identifier
+--------------------------
+
+Tokens of Line Number 6:
+--------------------------
+
+Tokens of Line Number 7:
+= is an operator
++ is an operator
+--------------------------
+
+Tokens of Line Number 8:
+= is an operator
+--------------------------
+
+Tokens of Line Number 9:
+int is a keyword
+d, is an Invalid Identifier
+--------------------------
+
+Tokens of Line Number 10:
+= is an operator
+* is an operator
+--------------------------
+
+Tokens of Line Number 11:
+= is an operator
+--------------------------
+
+Tokens of Line Number 12:
+int is a keyword
+arr[] is an Invalid Identifier
+= is an operator
+--------------------------
+
+Tokens of Line Number 13:
+--------------------------
+
+Tokens of Line Number 14:
+--------------------------
+
+Tokens of Line Number 15:
+--------------------------
+
+Tokens of Line Number 16:
+} is a punctuation
+--------------------------
+
+Tokens of Line Number 17:
+--------------------------
+
