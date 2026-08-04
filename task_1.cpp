@@ -7,7 +7,7 @@
 #include <stack>
 #include <bits/stdc++.h>
 using namespace std;
-using namespace std;
+
 int lineNumber = 0;
 char* idArray[100];
 int idCount = 0;
@@ -66,27 +66,25 @@ bool validIdentifier(char* str)
 // Returns 'true' if the string is a KEYWORD.
 bool isKeyword(char* str)
 {
-	if (!strcmp(str, "if") || !strcmp(str, "else") ||
-		!strcmp(str, "while") || !strcmp(str, "do") ||
-		!strcmp(str, "break") || !strcmp(str, "for") ||
-		!strcmp(str, "continue") || !strcmp(str, "int") ||
-		!strcmp(str, "double") || !strcmp(str, "float") ||
-		!strcmp(str, "return") || !strcmp(str, "char") ||
-		!strcmp(str, "case") || !strcmp(str, "char") ||
-		!strcmp(str, "sizeof") || !strcmp(str, "long") ||
-		!strcmp(str, "short") || !strcmp(str, "typedef") ||
-		!strcmp(str, "switch") || !strcmp(str, "unsigned") ||
-		!strcmp(str, "void") || !strcmp(str, "static") ||
-		!strcmp(str, "struct") || !strcmp(str, "goto") ||
-		!strcmp(str, "using") || !strcmp(str, "namespace") ||
-		!strcmp(str, "cout") || !strcmp(str, "cin") ||
-		!strcmp(str, "endl") || !strcmp(str, "return") ||
-		!strcmp(str, "main") || !strcmp(str, "include") ||
-		!strcmp(str, "for") || !strcmp(str, "int") || !strcmp(str, "std"))
-		return (true);
-	return (false);
-}
+    const char* keywords[] = {
+        "if", "else", "while", "do", "break", "for",
+        "continue", "int", "double", "float", "return",
+        "char", "case", "char", "sizeof", "long",
+        "short", "typedef", "switch", "unsigned", "void",
+        "static", "struct", "goto", "using", "namespace",
+        "cout", "cin", "endl", "return", "main",
+        "include", "for", "int", "std"
+    };
 
+    int total = sizeof(keywords) / sizeof(keywords[0]);
+
+    for (int i = 0; i < total; i++) {
+        if (strcmp(str, keywords[i]) == 0)
+            return true;
+    }
+
+    return false;
+}
 // Returns 'true' if the string is an INTEGER.
 bool isInteger(char* str)
 {
@@ -216,207 +214,176 @@ bool checkValidExpression(char* tokens[], int tokenCount) {
 // Parsing the input STRING.
 void parse(char* str)
 {
-	int left = 0, right = 0;
-	int len = strlen(str);
-	char* tokens[100];
-	int tokenCount = 0;
-	int start = 0;
+    int left = 0, right = 0;
+    int len = strlen(str);
+    char* tokens[100];
+    int tokenCount = 0;
+    int start = 0;
 
-    // Skip leading spaces and tabs
-    while(start < len && (str[start] == ' ' || str[start] == '\t'))
+    while (start < len && (str[start] == ' ' || str[start] == '\t'))
+        start++;
+
+    if (len > 0 && str[len - 1] != ';' &&
+        str[start] != '#' && str[start] != '/' &&
+        str[start] != '{' && str[start] != '}' &&
+        strncmp(str + start, "for", 3) != 0 &&
+        strncmp(str + start, "if", 2) != 0 &&
+        strncmp(str + start, "while", 5) != 0 &&
+        strncmp(str + start, "int main()", 10) != 0)
     {
-      start++;
-    }
-
-    if (len > 0 &&
-      str[len-1] != ';' &&
-      str[start] != '#' &&
-      str[start] != '/' &&
-      str[start] != '{' &&
-      str[start] != '}' &&
-      strncmp(str + start, "for", 3) != 0 &&
-      strncmp(str + start, "if", 2) != 0 &&
-      strncmp(str + start, "while", 5) != 0 &&
-      strncmp(str + start, "int main()", 10) != 0 )
-
-      {
         printf("\";\" missing in line - %d\n", lineNumber);
-      }
-
-
-	for(int i=0; i<len-1; i++)
-    {
-      if(str[i]=='/' && str[i+1]=='/')
-       {
-         printf("Comment in line - %d\n", lineNumber);
-         return;
-       }
-
     }
 
-
-
-	// Check for header file
-	if (len > 0 && str[0] == '#') {
-		// Extract library name
-		for (int i = 0; i < len; i++) {
-			if (str[i] == '<') {
-				int start = i + 1;
-				int end = start;
-				while (end < len && str[end] != '>') end++;
-				if (end < len) {
-					char* lib = subString(str, start, end - 1);
-					addUniqueLibrary(lib);
-					free(lib);
-				}
-				break;
-			}
-		}
-		return;
-	}
-	  for(int i=0; i<len; i++)
-      {
-        if(str[i] == '"')
-         {
-           str[i] = ' ';
-           i++;
-
-           while(i < len && str[i] != '"')
-           {
-             str[i] = ' ';
-             i++;
-           }
-
-           if(i < len)
-            str[i] = ' ';
+    for (int i = 0; i < len - 1; i++) {
+        if (str[i] == '/' && str[i + 1] == '/') {
+            printf("Comment in line - %d\n", lineNumber);
+            return;
         }
-      }
+    }
 
-	// Tokenize the line
-	while (right <= len && left <= right) {
-		if (isDelimiter(str[right]) == false) {
-			right++;
-		}
-		if (isDelimiter(str[right]) == true && left == right) {
-			if (isOperator(str[right]) == true) {
-				char op[2] = {str[right], '\0'};
-				tokens[tokenCount] = (char*)malloc(2);
-				strcpy(tokens[tokenCount], op);
-				tokenCount++;
-				addUniqueOperator(str[right]);
-			}
-			right++;
-			left = right;
-		} else if (isDelimiter(str[right]) == true && left != right || (right == len && left != right)) {
-			char* subStr = subString(str, left, right - 1);
+    if (len > 0 && str[0] == '#') {
+        for (int i = 0; i < len; i++) {
+            if (str[i] == '<') {
+                int start = i + 1;
+                int end = start;
 
-			if (isKeyword(subStr) == false) {
-				if (isInteger(subStr) == true) {
-					printf("'%s' is an integer\n", subStr);
-					tokens[tokenCount] = (char*)malloc(strlen(subStr) + 1);
-					strcpy(tokens[tokenCount], subStr);
-					tokenCount++;
-				} else if (isRealNumber(subStr) == true) {
-					printf("'%s' is a real number\n", subStr);
-					tokens[tokenCount] = (char*)malloc(strlen(subStr) + 1);
-					strcpy(tokens[tokenCount], subStr);
-					tokenCount++;
-				} else if (validIdentifier(subStr) == true) {
-					addUniqueVariable(subStr);
-					tokens[tokenCount] = (char*)malloc(strlen(subStr) + 1);
-					strcpy(tokens[tokenCount], subStr);
-					tokenCount++;
-				} else {
-					addInvalidVariable(subStr);
-					tokens[tokenCount] = (char*)malloc(strlen(subStr) + 1);
-					strcpy(tokens[tokenCount], subStr);
-					tokenCount++;
-				}
-			} else {
-				tokens[tokenCount] = (char*)malloc(strlen(subStr) + 1);
-				strcpy(tokens[tokenCount], subStr);
-				tokenCount++;
-			}
-			free(subStr);
-			left = right;
-		}
-	}
+                while (end < len && str[end] != '>')
+                    end++;
 
-	// Check expression validity
-	if (tokenCount >= 3) {
-		bool valid = checkValidExpression(tokens, tokenCount);
-		if (!valid && str[0] != '#' && str[0] != '/') {
-			// Check if it's not a variable declaration line
-			bool isDeclaration = false;
-			for (int i = 0; i < tokenCount; i++) {
-				if (isKeyword(tokens[i])) {
-					isDeclaration = true;
-					break;
-				}
-			}
-			if (!isDeclaration) {
-				printf("Invalid expression in line - %d\n", lineNumber);
-			}
-		}
-	}
+                if (end < len) {
+                    char* lib = subString(str, start, end - 1);
+                    addUniqueLibrary(lib);
+                    free(lib);
+                }
+                return;
+            }
+        }
+    }
 
-	// Clean up tokens
-	for (int i = 0; i < tokenCount; i++) {
-		free(tokens[i]);
-	}
-	return;
+    for (int i = 0; i < len; i++) {
+        if (str[i] == '"') {
+            str[i] = ' ';
+            while (++i < len && str[i] != '"')
+                str[i] = ' ';
+            if (i < len)
+                str[i] = ' ';
+        }
+    }
+
+    while (right <= len && left <= right) {
+
+        if (!isDelimiter(str[right]))
+            right++;
+
+        if (isDelimiter(str[right]) && left == right) {
+
+            if (isOperator(str[right])) {
+                char op[2] = {str[right], '\0'};
+                tokens[tokenCount] = (char*)malloc(2);
+                strcpy(tokens[tokenCount++], op);
+                addUniqueOperator(str[right]);
+            }
+
+            right++;
+            left = right;
+        }
+        else if ((isDelimiter(str[right]) && left != right) ||
+                 (right == len && left != right)) {
+
+            char* subStr = subString(str, left, right - 1);
+
+            if (!isKeyword(subStr)) {
+                if (isInteger(subStr))
+                    printf("'%s' is an integer\n", subStr);
+                else if (isRealNumber(subStr))
+                    printf("'%s' is a real number\n", subStr);
+                else if (validIdentifier(subStr))
+                    addUniqueVariable(subStr);
+                else
+                    addInvalidVariable(subStr);
+            }
+
+            tokens[tokenCount] = (char*)malloc(strlen(subStr) + 1);
+            strcpy(tokens[tokenCount++], subStr);
+
+            free(subStr);
+            left = right;
+        }
+    }
+
+    if (tokenCount >= 3) {
+        if (!checkValidExpression(tokens, tokenCount) &&
+            str[0] != '#' && str[0] != '/') {
+
+            bool isDeclaration = false;
+
+            for (int i = 0; i < tokenCount; i++) {
+                if (isKeyword(tokens[i])) {
+                    isDeclaration = true;
+                    break;
+                }
+            }
+
+            if (!isDeclaration)
+                printf("Invalid expression in line - %d\n", lineNumber);
+        }
+    }
+
+    for (int i = 0; i < tokenCount; i++)
+        free(tokens[i]);
 }
 // DRIVER FUNCTION
-int main(){
-	ifstream MyReadFile("program.cpp");
-	string line;
+int main() {
+    ifstream MyReadFile("program.cpp");
+    string line;
 
-	while(getline(MyReadFile, line)) {
-		lineNumber++;
-		int n = line.length();
-		char str[n + 1];
-		strcpy(str, line.c_str());
-		parse(str);
-	}
-	MyReadFile.close();
+    while (getline(MyReadFile, line)) {
+        lineNumber++;
 
-	// Print all libraries
-	printf("\n");
-	for (int i = 0; i < libCount; i++) {
-		printf("Library- %d: %s\n", i+1, libArray[i]);
-	}
+        char str[line.length() + 1];
+        strcpy(str, line.c_str());
 
-	// Print all variables
-	printf("\n");
-	for (int i = 0; i < idCount; i++) {
-		printf("Variable- %d: %s\n", i+1, idArray[i]);
-	}
-	printf("Total number of the variables: %d\n", idCount);
+        parse(str);
+    }
 
-	// Print all operators
-	printf("\n");
-	for (int i = 0; i < opCount; i++) {
-		printf("Operator- %d: %s\n", i+1, opArray[i]);
-	}
-	printf("Total number of the operators: %d\n", opCount);
+    MyReadFile.close();
 
-	// Print invalid variables
-	if (invalidVarCount > 0) {
-		printf("\n");
-		for (int i = 0; i < invalidVarCount; i++) {
-			printf("Invalid variable - %s\n", invalidVarArray[i]);
-		}
-	}
+    printf("\n");
+    for (int i = 0; i < libCount; i++)
+        printf("Library- %d: %s\n", i + 1, libArray[i]);
 
-	if (semicolonMissing) {
-		printf("Errors!\n");
-	}
+    printf("\n");
+    for (int i = 0; i < idCount; i++)
+        printf("Variable- %d: %s\n", i + 1, idArray[i]);
 
-	// Clean up
-	for (int i = 0; i < idCount; i++) free(idArray[i]);
-	for (int i = 0; i < opCount; i++) free(opArray[i]);
-	for (int i = 0; i < libCount; i++) free(libArray[i]);
-	for (int i = 0; i < invalidVarCount; i++) free(invalidVarArray[i]);
+    printf("Total number of the variables: %d\n", idCount);
 
-	return (0);
+    printf("\n");
+    for (int i = 0; i < opCount; i++)
+        printf("Operator- %d: %s\n", i + 1, opArray[i]);
+
+    printf("Total number of the operators: %d\n", opCount);
+
+    if (invalidVarCount > 0) {
+        printf("\n");
+        for (int i = 0; i < invalidVarCount; i++)
+            printf("Invalid variable - %s\n", invalidVarArray[i]);
+    }
+
+    if (semicolonMissing)
+        printf("Errors!\n");
+
+    for (int i = 0; i < idCount; i++)
+        free(idArray[i]);
+
+    for (int i = 0; i < opCount; i++)
+        free(opArray[i]);
+
+    for (int i = 0; i < libCount; i++)
+        free(libArray[i]);
+
+    for (int i = 0; i < invalidVarCount; i++)
+        free(invalidVarArray[i]);
+
+    return 0;
 }
